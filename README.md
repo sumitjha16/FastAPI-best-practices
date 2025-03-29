@@ -251,17 +251,15 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return user
 ```
 
-Implement MFA Logic
+#Implement MFA Logic
 Register Users: Allow users to register and generate a unique OTP secret.
-
 Login: Validate username and password, and then request OTP.
-
 Verify OTP: Verify the OTP provided by the user.
-
+```python
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 import pyotp
-```python
+
 app = FastAPI()
 
 def get_db():
