@@ -192,7 +192,7 @@ Key database best practices:
 - Use migrations for schema changes
 - Consider async database drivers for better performance
 
-##Role-Based Access
+## Role-Based Access
 Role-Based Access Control (RBAC) enables secure resource access based on user roles and their associated permissions. This guide demonstrates a practical RBAC implementation in FastAPI, including user authentication, token management, and permission validation.
 
 User Data and Models Users are associated with roles and permissions. In a real-world app, this data would be stored in a database.
