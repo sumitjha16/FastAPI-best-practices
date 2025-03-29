@@ -773,11 +773,11 @@ Production checklist:
 - [ ] Have a rollback plan for deployments
 
 
-##Sources
--https://app-generator.dev/docs/technologies/fastapi.html
--https://devcurrent.com/building-secure-apis-with-fastapi/
--https://loadforge.com/guides/fastapi-performance-tuning-tricks-to-enhance-speed-and-scalability
--https://technostacks.com/blog/mastering-fastapi-a-comprehensive-guide-and-best-practices/
--https://toxigon.com/fastapi-best-practices-for-production
--https://dev.to/devasservice/fastapi-best-practices-a-condensed-guide-with-examples-3pa5
--https://medium.com/@lautisuarez081/fastapi-best-practices-and-design-patterns-building-quality-python-apis-31774ff3c28a
+## 📚 Sources
+- [FastAPI App Generator](https://app-generator.dev/docs/technologies/fastapi.html)
+- [Building Secure APIs with FastAPI](https://devcurrent.com/building-secure-apis-with-fastapi/)
+- [FastAPI Performance Tuning](https://loadforge.com/guides/fastapi-performance-tuning-tricks-to-enhance-speed-and-scalability)
+- [Mastering FastAPI](https://technostacks.com/blog/mastering-fastapi-a-comprehensive-guide-and-best-practices/)
+- [FastAPI Best Practices](https://toxigon.com/fastapi-best-practices-for-production)
+- [FastAPI Guide on Dev.to](https://dev.to/devasservice/fastapi-best-practices-a-condensed-guide-with-examples-3pa5)
+- [Medium: FastAPI Best Practices](https://medium.com/@lautisuarez081/fastapi-best-practices-and-design-patterns-building-quality-python-apis-31774ff3c28a)
