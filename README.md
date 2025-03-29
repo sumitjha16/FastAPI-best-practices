@@ -192,6 +192,124 @@ Key database best practices:
 - Use migrations for schema changes
 - Consider async database drivers for better performance
 
+##Role-Based Access
+Role-Based Access Control (RBAC) enables secure resource access based on user roles and their associated permissions. This guide demonstrates a practical RBAC implementation in FastAPI, including user authentication, token management, and permission validation.
+
+User Data and Models Users are associated with roles and permissions. In a real-world app, this data would be stored in a database.
+```python
+import datetime
+from typing import List, Dict
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel
+import jwt
+import bcrypt
+
+app = FastAPI()
+
+# Simulated in-memory user data
+users_db = [
+    {
+        "id": 1,
+        "username": "admin",
+        "hashed_password": bcrypt.hashpw(b"admin123", bcrypt.gensalt()).decode(),
+        "roles": ["admin"],
+        "permissions": ["read:items", "write:items", "read:users"]
+    },
+    {
+        "id": 2,
+        "username": "editor",
+        "hashed_password": bcrypt.hashpw(b"editor123", bcrypt.gensalt()).decode(),
+        "roles": ["editor"],
+        "permissions": ["read:items", "write:items"]
+    },
+    {
+        "id": 3,
+        "username": "viewer",
+        "hashed_password": bcrypt.hashpw(b"viewer123", bcrypt.gensalt()).decode(),
+        "roles": ["viewer"],
+        "permissions": ["read:items"]
+    }
+]
+
+class User(BaseModel):
+    username: str
+    roles: List[str]
+    permissions: List[str]
+```
+Authentication and Token Handling Authenticate users and issue JWT tokens with payloads containing role and permission information.
+
+```python
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+def authenticate_user(username: str, password: str) -> User:
+    for user in users_db:
+        if user["username"] == username and bcrypt.checkpw(password.encode(), user["hashed_password"].encode()):
+            return User(username=user["username"], roles=user["roles"], permissions=user["permissions"])
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid username or password"
+    )
+
+def create_access_token(data: dict) -> str:
+    payload = {
+        "sub": data["username"],
+        "roles": data["roles"],
+        "permissions": data["permissions"],
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+    }
+    token = jwt.encode(payload, "secret_key", algorithm="HS256")
+    return token
+
+class LoginRequest(BaseModel):
+ username: str
+ password: str
+
+ @app.post("/login")
+ def login(request: LoginRequest):
+     user = authenticate_user(request.username, request.password)
+     token = create_access_token(user.dict())
+     return {"access_token": token, "token_type": "bearer"}
+```
+
+Permission Checker A custom dependency to validate required permissions before accessing protected resources.
+
+```python
+class PermissionChecker:
+    def __init__(self, required_permissions: List[str]) -> None:
+        self.required_permissions = required_permissions
+
+    def __call__(self, token: str = Depends(oauth2_scheme)) -> None:
+        try:
+            payload = jwt.decode(token, "secret_key", algorithms=["HS256"])
+            user_permissions = payload.get("permissions", [])
+            for perm in self.required_permissions:
+                if perm not in user_permissions:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail=f"Permission '{perm}' is required"
+                    )
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(status_code=401, detail="Token has expired")
+        except jwt.DecodeError:
+            raise HTTPException(status_code=401, detail="Invalid token")
+```
+Secure API Endpoints Endpoints are secured based on user roles and permissions.
+
+```python
+@app.get("/items", dependencies=[Depends(PermissionChecker(["read:items"]))])
+def read_items():
+    return {"message": "You can view items"}
+
+@app.post("/items", dependencies=[Depends(PermissionChecker(["write:items"]))])
+def create_item():
+    return {"message": "You can create items"}
+
+@app.get("/users", dependencies=[Depends(PermissionChecker(["read:users"]))])
+def read_users():
+    return {"message": "You can view users"}
+```
+
 ## Authentication and Security
 
 Security is like the lock on your front door - you wouldn't leave your house unlocked, and you shouldn't leave your API unprotected. Authentication ensures only the right people can access your API, while authorization controls what they can do once they're in.
@@ -251,7 +369,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return user
 ```
 
-## Implement MFA Logic
+##Implement MFA Logic
 Register Users: Allow users to register and generate a unique OTP secret.
 Login: Validate username and password, and then request OTP.
 Verify OTP: Verify the OTP provided by the user.
