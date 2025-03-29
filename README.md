@@ -772,4 +772,12 @@ Production checklist:
 - [ ] Perform regular load testing
 - [ ] Have a rollback plan for deployments
 
-Remember, the goal isn't perfection but continuous improvement. Start with the most critical items and gradually implement others as your API grows.
+
+##Sources
+-https://app-generator.dev/docs/technologies/fastapi.html
+-https://devcurrent.com/building-secure-apis-with-fastapi/
+-https://loadforge.com/guides/fastapi-performance-tuning-tricks-to-enhance-speed-and-scalability
+-https://technostacks.com/blog/mastering-fastapi-a-comprehensive-guide-and-best-practices/
+-https://toxigon.com/fastapi-best-practices-for-production
+-https://dev.to/devasservice/fastapi-best-practices-a-condensed-guide-with-examples-3pa5
+-https://medium.com/@lautisuarez081/fastapi-best-practices-and-design-patterns-building-quality-python-apis-31774ff3c28a
