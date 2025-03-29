@@ -251,6 +251,55 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return user
 ```
 
+Implement MFA Logic
+Register Users: Allow users to register and generate a unique OTP secret.
+
+Login: Validate username and password, and then request OTP.
+
+Verify OTP: Verify the OTP provided by the user.
+
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+import pyotp
+```
+app = FastAPI()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@app.post("/register")
+def register_user(username: str, password: str, db: Session = Depends(get_db)):
+    otp_secret = pyotp.random_base32()
+    new_user = User(username=username, password=password, otp_secret=otp_secret)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return {"message": "User registered!", "otp_secret": otp_secret}
+
+@app.post("/login")
+def login_user(username: str, password: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user or user.password != password:
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+    return {"message": "Login successful, provide OTP"}
+
+@app.post("/verify-otp")
+def verify_otp(username: str, otp: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    totp = pyotp.TOTP(user.otp_secret)
+    if not totp.verify(otp):
+        raise HTTPException(status_code=400, detail="Invalid OTP")
+    user.is_otp_verified = True
+    db.commit()
+    return {"message": "OTP verified successfully"}
+```
+
 Security essentials:
 - Always hash passwords (never store them plaintext)
 - Use HTTPS in production
