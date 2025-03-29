@@ -261,7 +261,7 @@ Verify OTP: Verify the OTP provided by the user.
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 import pyotp
-```
+```python
 app = FastAPI()
 
 def get_db():
